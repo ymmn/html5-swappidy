@@ -15,11 +15,11 @@ class window.GameMenu extends GameScreen
       # make rectangle draw about center
       rect.regX = btnWidth / 2
       rect.regY = btnHeight / 2
-      rect.graphics.beginFill("#ccc").drawRoundRect(x, y, btnWidth, btnHeight, 5)
+      rect.graphics.beginFill("#ccc").drawRoundRect(x,   y,   btnWidth,   btnHeight,   5)
 
       txt = new createjs.Text btnText, DEFAULT_FONT
       txt.textAlign = "center";
-      txt.x = x 
+      txt.x = x
       txt.y = y - (txt.getMeasuredHeight() / 2)
 
       @container.addChild rect

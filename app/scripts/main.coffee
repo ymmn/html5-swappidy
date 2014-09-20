@@ -4,7 +4,7 @@ class window.Game
   ############## PRIVATE METHODS #############
   _tick = () ->
     @stage.update()
-    @currentScreen.tick() if @currentScreen != undefined
+    @currentScreen.tick() if @currentScreen isnt undefined
 
   _toggleSound = () ->
     @mute = not @mute
@@ -16,7 +16,7 @@ class window.Game
 
 
   _keyHandler = (e, isPressed) ->
-    # prevent scrolling 
+    # prevent scrolling
     e.preventDefault()
     @playScreen.keyHandler e, isPressed
 
@@ -24,7 +24,7 @@ class window.Game
   _onDoneLoadingResources = (loadingProgressTxt) ->
     # start the music
     @stage.removeChild loadingProgressTxt
-    createjs.Sound.play "music", createjs.Sound.INTERRUPT_NONE, 0, 0, -1, 0.25
+    createjs.Sound.play "music", createjs.Sound.INTERRUPT_NONE, 0, 0, - 1, 0.25
 
     # add start menu
     @startMenuScreen = new StartMenu()
@@ -52,7 +52,7 @@ class window.Game
   _switchScreenTo = (targetScreen) ->
     screens = [@playScreen, @startMenuScreen, @instructionsScreen]
     for screen in screens
-      if screen == targetScreen 
+      if screen == targetScreen
         screen.activateScreen @stage
         @currentScreen = targetScreen
       else
@@ -84,7 +84,7 @@ class window.Game
     # create a stage object to work with the canvas. This is the top level node in the display list:
     @stage = new createjs.Stage canvas
 
-    # start game timer   
+    # start game timer
     if not createjs.Ticker.hasEventListener "tick"
       createjs.Ticker.addEventListener "tick", _tick.bind @
 
@@ -95,8 +95,8 @@ class window.Game
       id: "music",
       src: "assets/music.mp3"
     ]
-    
-    # show loading 
+
+    # show loading
     loadingProgressTxt = new createjs.Text "Loading", "bold 24px Arial", "#000"
     loadingProgressTxt.maxWidth = 1000
     loadingProgressTxt.textAlign = "center"
@@ -111,8 +111,9 @@ class window.Game
     preload.addEventListener "complete", _onDoneLoadingResources.bind @, loadingProgressTxt
     preload.loadManifest manifest
 
-    # mute button event 
+    # mute button event
     $("#mute").click _toggleSound
-    @mute = false
+    @mute = true
+    createjs.Sound.setMute @mute
 
 window.game = new Game()

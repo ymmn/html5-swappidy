@@ -1,5 +1,5 @@
 class window.GameScreen
-  
+
   constructor: (stage) ->
     @container = new createjs.Container()
 

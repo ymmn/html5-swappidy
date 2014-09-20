@@ -1,15 +1,15 @@
 class window.PlayScreen extends GameScreen
 
   STATES =
-    PLAYING: -10234
-    GAMEOVER: -102334
+    PLAYING: - 10234
+    GAMEOVER: - 102334
 
   constructor: () ->
     super()
 
     # dummy rectangle
     myshape = new createjs.Shape()
-    myshape.graphics.beginStroke("#F00").beginFill("#00F").drawRect(0, 0, 100, 50)
+    myshape.graphics.beginStroke("#F00").beginFill("#00F").drawRect(0,             0,             100,             50)
     myshape.x = 100
     myshape.y = 100
     @container.addChild myshape
@@ -24,7 +24,7 @@ class window.PlayScreen extends GameScreen
     @scoreTxt = new createjs.Text "Score: #{ @score }", "bold 24px Arial"
     @scoreTxt.x = game.CANVAS_WIDTH - 150
     @scoreTxt.y = 10
-    @container.addChild @scoreTxt   
+    @container.addChild @scoreTxt
 
     @initGameState()
 
@@ -33,6 +33,7 @@ class window.PlayScreen extends GameScreen
     @scoreTxt.text = "Score: #{ @score }"
 
   keyHandler: (e, isPressed) ->
+    window.Init.handleKeyDown e if isPressed
     if @state == STATES.PLAYING
       switch e.keyCode
         when KeyEvent.LEFT then @keyPressedTxt.text = "LEFT"
@@ -40,23 +41,28 @@ class window.PlayScreen extends GameScreen
         when KeyEvent.DOWN then @keyPressedTxt.text = "DOWN"
         when KeyEvent.UP then @keyPressedTxt.text = "UP"
         when KeyEvent.Q then @displayGameOver()
-        else 
+        else
           @keyPressedTxt.text = "Keycode #{e.keyCode} down: #{isPressed}"
-      @updateScore (@score+1)
+      @updateScore (@score + 1)
 
   initGameState: () ->
     # reset all values to defaults here
     @updateScore 0
     @state = STATES.PLAYING
 
+    window.Init.init(@container)
+
     # no game over
     @container.removeChild @gameOverContainer
 
   displayGameOver: () ->
-    # change state 
+    # change state
     @state = STATES.GAMEOVER
 
     # add game over overlay
     gameOverOverlay = new GameOverOverlay @
     @gameOverContainer = gameOverOverlay.container
     @container.addChild @gameOverContainer
+
+  tick: () ->
+    window.Init.tick()
