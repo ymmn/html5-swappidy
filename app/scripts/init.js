@@ -5,8 +5,6 @@ window.Init = (function() {
   var grid;
 
   function init(stage) {
-    console.log(stage);
-
     cursor = new Cursor();
     grid = new Grid(cursor);
     stage.addChild(grid);

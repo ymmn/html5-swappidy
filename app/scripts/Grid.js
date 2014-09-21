@@ -68,8 +68,6 @@
       var block = new window.Block(col, row, blockType);
       this.blockGrid[col][row] = block;
       block.setPosition(col, row);
-      console.log(block.col);
-      console.log(block.row);
       block.setGrid(this);
       this.blockContainer.addChild(block.shape);
     }
