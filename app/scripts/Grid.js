@@ -65,13 +65,15 @@
   p.createBlock = function(col, row, blockType) {
 
     if (!this.getBlock(col, row)) {
-      block = new Block(col, row, blockType);
+      var block = new window.Block(col, row, blockType);
       this.blockGrid[col][row] = block;
       block.setPosition(col, row);
+      console.log(block.col);
+      console.log(block.row);
       block.setGrid(this);
-      this.blockContainer.addChild(block);
+      this.blockContainer.addChild(block.shape);
     }
-  }
+  };
 
   // swap a block with block to the right
   p.swapBlocks = function(col, row) {
@@ -82,7 +84,7 @@
 
     this.setBlockPosition(block1, col + 1, row);
     this.setBlockPosition(block2, col, row);
-  }
+  };
 
   // delete the block in position
   p.deleteBlock = function(col, row) {
@@ -188,12 +190,12 @@
       for (var j = 1; j < Grid.HEIGHT; j++) {
         block = this.getBlock(i, j);
         if (block != null) {
-          //block.tick(event); // disabled until further notice -Matthew
+          block.tick(event);
           this.dropBlock(i, j);
         }
       }
     }
-  }
+  };
 
   window.Grid = Grid;
 
