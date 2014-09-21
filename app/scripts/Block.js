@@ -95,8 +95,8 @@
   Block.prototype.setPosition = function(col, row) {
     this.col = col;
     this.row = row;
-    this.x = col * Block.WIDTH;
-    this.y = (Grid.HEIGHT - row - 1) * Block.HEIGHT;
+    this.shape.x = col * Block.WIDTH;
+    this.shape.y = (Grid.HEIGHT - row - 1) * Block.HEIGHT;
   };
 
   Block.prototype.tick = function() {

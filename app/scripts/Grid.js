@@ -44,7 +44,7 @@
 
     this.blockContainer = new createjs.Container();
     this.addChild(this.blockContainer);
-  }
+  };
 
   // public methods:
   p.makeShape = function() {
@@ -59,7 +59,7 @@
     g.lineTo(0, Grid.HEIGHT * Block.HEIGHT); //bottom-left
     g.closePath(); //top-left
 
-  }
+  };
 
   // put a block into the blockGrid at position
   p.createBlock = function(col, row, blockType) {
@@ -90,19 +90,19 @@
   p.deleteBlock = function(col, row) {
     this.blockGrid[col][row] = null;
     //remove block container
-  }
+  };
 
   // set the blocks x and y coords based on grid cell
   p.setBlockPosition = function(block, col, row) {
-    if (block != null) {
+    if (block !== null) {
       block.setPosition(col, row);
     }
     this.blockGrid[col][row] = block;
-  }
+  };
 
   p.getBlock = function(col, row) {
     return this.blockGrid[col][row];
-  }
+  };
 
   // the block falls if it is able to
   p.dropBlock = function(col, row) {
@@ -115,7 +115,7 @@
       this.setBlockPosition(block1, col, row - 1);
       this.setBlockPosition(block2, col, row);
     }
-  }
+  };
 
   // blocks fall up
   p.raiseBlock = function(col, row) {
@@ -128,7 +128,7 @@
       this.setBlockPosition(block1, col, row + 1);
       this.setBlockPosition(block2, col, row);
     }
-  }
+  };
 
 
   // create a new row of inactive blocks
@@ -139,7 +139,7 @@
       this.createBlock(i, 0, randomnumber);
     }
 
-  }
+  };
 
   // shift all blocks up 1 grid coordinate
 
@@ -149,7 +149,7 @@
         this.raiseBlock(i, j);
       }
     }
-  }
+  };
 
   /*
     grid slowly moves up
@@ -170,13 +170,13 @@
       // TODO shift cursor up
       this.cursor.attemptMoveUp(); // hacky temp approach (avoid implicitely calling globals) this is only for checking the functionality
     }
-  }
+  };
 
   // check block to find matches
   p.getMatch = function(col, row) {
     //while (
 
-  }
+  };
 
   p.tick = function(event) {
     //TODO climb will need refactored after implementing block statefullness -Matthew
@@ -189,7 +189,7 @@
     for (var i = 0; i < Grid.WIDTH; i++) {
       for (var j = 1; j < Grid.HEIGHT; j++) {
         block = this.getBlock(i, j);
-        if (block != null) {
+        if (block !== null) {
           block.tick(event);
           this.dropBlock(i, j);
         }
