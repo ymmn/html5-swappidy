@@ -86,13 +86,13 @@
 
   // delete the block in position
   p.deleteBlock = function(col, row) {
-    this.blockGrid[col][row] = null;
+    this.blockGrid[col][row] = undefined;
     //remove block container
   };
 
   // set the blocks x and y coords based on grid cell
   p.setBlockPosition = function(block, col, row) {
-    if (block !== null) {
+    if (block !== undefined) {
       block.setPosition(col, row);
     }
     this.blockGrid[col][row] = block;
@@ -104,9 +104,9 @@
 
   // the block falls if it is able to
   p.dropBlock = function(col, row) {
-    if (row > 0 && this.getBlock(col, row - 1) == null) {
+    if (row > 0 && this.getBlock(col, row - 1) == undefined) {
       block1 = this.getBlock(col, row);
-      block2 = null
+      block2 = undefined
 
       // TODO deal with falling state
 
@@ -117,9 +117,9 @@
 
   // blocks fall up
   p.raiseBlock = function(col, row) {
-    if (row < Grid.HEIGHT && this.getBlock(col, row + 1) == null) {
+    if (row < Grid.HEIGHT && this.getBlock(col, row + 1) == undefined) {
       block1 = this.getBlock(col, row);
-      block2 = null
+      block2 = undefined
 
       // TODO states
 
@@ -187,7 +187,7 @@
     for (var i = 0; i < Grid.WIDTH; i++) {
       for (var j = 1; j < Grid.HEIGHT; j++) {
         block = this.getBlock(i, j);
-        if (block !== null) {
+        if (block !== undefined) {
           block.tick(event);
           this.dropBlock(i, j);
         }
