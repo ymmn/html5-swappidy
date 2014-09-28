@@ -57,7 +57,7 @@
   p.createBlock = function(col, row, blockType) {
     if (!this.getBlock(col, row)) {
       var block = new window.Block(this, col, row, blockType);
-      this.blockContainer.addChild(block.shape);
+      this.blockContainer.addChild(block.getShape());
     }
   };
 
@@ -149,8 +149,9 @@
       for (var row = 0; row < Grid.HEIGHT; row++) {
         var block = this.blockGrid[col][row];
         if (block !== undefined) {
-          if (block.col !== col || block.row !== row) {
-            console.log('block[' + col + '][' + row + '] -> (' + block.col + ', ' + block.row + ')');
+          var pos = block.getPosition();
+          if (pos.col !== col || pos.row !== row) {
+            console.log('block[' + col + '][' + row + '] -> (' + pos.col + ', ' + pos.row + ')');
           }
         }
       }
