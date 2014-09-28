@@ -9,7 +9,7 @@ class window.PlayScreen extends GameScreen
 
     # dummy rectangle
     myshape = new createjs.Shape()
-    myshape.graphics.beginStroke("#F00").beginFill("#00F").drawRect(0,             0,             100,             50)
+    myshape.graphics.beginStroke("#F00").beginFill("#00F").drawRect(0,                       0,                       100,                       50)
     myshape.x = 100
     myshape.y = 100
     @container.addChild myshape
@@ -33,7 +33,7 @@ class window.PlayScreen extends GameScreen
     @scoreTxt.text = "Score: #{ @score }"
 
   keyHandler: (e, isPressed) ->
-    window.Init.handleKeyDown e if isPressed
+    window.Init.handleKeyDown e if not isPressed
     if @state == STATES.PLAYING
       switch e.keyCode
         when KeyEvent.LEFT then @keyPressedTxt.text = "LEFT"
