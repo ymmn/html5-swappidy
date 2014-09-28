@@ -12,7 +12,8 @@
       _color,
       _climbHeight,
       _blockGrid,
-      _gridBody;
+      _gridBody,
+      _container;
 
     var initialize = function(cursorHandle) {
 
@@ -20,11 +21,11 @@
       _isSwapping = false;
       _blocksToMove = [];
 
-      self.gridContainer = new window.createjs.Container();
+      _container = new window.createjs.Container();
 
       _color = '#0066cc';
       _gridBody = new window.createjs.Shape();
-      self.gridContainer.addChild(_gridBody);
+      _container.addChild(_gridBody);
 
       makeShape();
 
@@ -36,7 +37,7 @@
       }
 
       self.blockContainer = new window.createjs.Container();
-      self.gridContainer.addChild(self.blockContainer);
+      _container.addChild(self.blockContainer);
     };
 
     var checkBlockGridConsistency = function() {
@@ -150,6 +151,10 @@
 
     self.setSwapping = function(isSwapping) {
       _isSwapping = isSwapping;
+    };
+
+    self.getContainer = function() {
+      return _container;
     };
 
     self.tick = function(event) {
