@@ -9,7 +9,8 @@ window.BlockState = {
   FALLING: 1,
   SITTING: 2,
   INCUBATING: 3,
-  SWAPPING: 4,
+  SWAPPING_LEFT: 4,
+  SWAPPING_RIGHT: 7,
   DYING: 5,
   GONE: 6
 };

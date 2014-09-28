@@ -2,8 +2,9 @@
 
 (function(BlockState, createjs, Color, Grid) {
 
-  function Block(x, y, type) {
+  function Block(grid, x, y, type) {
     this.initialize();
+    this.grid = grid;
     this.setPosition(x, y);
     this.setType(type);
   }
@@ -69,10 +70,13 @@
         this.color = 'blue';
         break;
       case BlockState.SITTING:
-        this.color = 'purple';
+        this.color = 'orange';
         break;
-      case BlockState.SWAPPING:
+      case BlockState.SWAPPING_LEFT:
         this.color = 'red';
+        break;
+      case BlockState.SWAPPING_RIGHT:
+        this.color = 'purple';
         break;
       case BlockState.DYING:
         this.color = 'yellow';
@@ -93,13 +97,41 @@
   };
 
   Block.prototype.setPosition = function(col, row) {
+    var oldCol = this.col;
+    var oldRow = this.row;
     this.col = col;
     this.row = row;
     this.shape.x = col * Block.WIDTH;
     this.shape.y = (Grid.HEIGHT - row - 1) * Block.HEIGHT;
+
+    this.grid.setBlockPosition(this, oldCol, oldRow, col, row);
+  };
+
+  Block.prototype.setState = function(state) {
+    this.state = state;
+  };
+
+  var SWAP_SPEED = 1;
+
+  Block.prototype.swapToCol = function(targetCol) {
+    var targetX = targetCol * Block.WIDTH;
+    var direction = this.shape.x < targetX ? 1 : -1;
+    var doneSwapping = Math.abs(targetX - this.shape.x) <= SWAP_SPEED;
+    if (doneSwapping) {
+      this.setPosition(targetCol, this.row);
+      this.setState(BlockState.SITTING);
+      this.grid.isSwapping = false;
+    } else {
+      this.shape.x += direction * SWAP_SPEED;
+    }
   };
 
   Block.prototype.tick = function() {
+    if (this.state === BlockState.SWAPPING_LEFT) {
+      this.swapToCol(this.col - 1);
+    } else if (this.state === BlockState.SWAPPING_RIGHT) {
+      this.swapToCol(this.col + 1);
+    }
     if (window.DEBUG_MODE) {
       this.setDebugColor();
       this.makeShape();

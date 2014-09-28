@@ -25,8 +25,6 @@ window.Init = (function() {
     grid.createBlock(2, 12, 2);
     grid.createBlock(3, 12, 2);
     grid.createBlock(3, 13, 2);
-    grid.swapBlocks(3, 3);
-    grid.swapBlocks(4, 3);
 
     grid.addChild(cursor);
     cursor.setLeftPosition(2, 3);
