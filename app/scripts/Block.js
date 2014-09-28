@@ -36,7 +36,7 @@
       if (doneSwapping) {
         self.setPosition(targetCol, _row);
         self.setState(BlockState.SITTING);
-        _grid.isSwapping = false;
+        _grid.setSwapping(false);
       } else {
         _shape.x += direction * SWAP_SPEED;
       }
