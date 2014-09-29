@@ -6,14 +6,17 @@
 
     var self = this;
 
+    // private members
     var _cursor,
       _isSwapping,
       _blocksToMove,
       _color,
-      _climbHeight,
-      _blockGrid,
       _gridBody,
       _container;
+
+    // private methods
+    var getBlock,
+      applyBlocksToMove;
 
     var initialize = function(cursorHandle) {
 
@@ -29,29 +32,56 @@
 
       makeShape();
 
-      _climbHeight = 0;
-
-      _blockGrid = [];
-      for (var i = 0; i < Grid.WIDTH; i++) {
-        _blockGrid[i] = [];
-      }
+      initializeBlockGrid();
 
       self.blockContainer = new window.createjs.Container();
       _container.addChild(self.blockContainer);
     };
 
-    var checkBlockGridConsistency = function() {
+    // the block grid should not be hand edited, hence being enclosed
+    // in this function's scope
+    var initializeBlockGrid = function() {
+      var _blockGrid = [];
       for (var col = 0; col < Grid.WIDTH; col++) {
-        for (var row = 0; row < Grid.HEIGHT; row++) {
-          var block = _blockGrid[col][row];
+        _blockGrid[col] = [];
+      }
+
+      getBlock = function(col, row) {
+        return _blockGrid[col][row];
+      };
+
+      applyBlocksToMove = function(blocksToMove) {
+        // first unset blocks, then set blocks
+        var b2m, i;
+        for (i = 0; i < blocksToMove.length; i++) {
+          b2m = blocksToMove[i];
+          _blockGrid[b2m.oldCol][b2m.oldRow] = undefined;
+        }
+        for (i = 0; i < blocksToMove.length; i++) {
+          b2m = blocksToMove[i];
+          _blockGrid[b2m.col][b2m.row] = b2m.block;
+        }
+      };
+    };
+
+    var forAllBlocks = function(func) {
+      for (var i = 0; i < Grid.WIDTH; i++) {
+        for (var j = 0; j < Grid.HEIGHT; j++) {
+          var block = getBlock(i, j);
           if (block !== undefined) {
-            var pos = block.getPosition();
-            if (pos.col !== col || pos.row !== row) {
-              console.log('block[' + col + '][' + row + '] -> (' + pos.col + ', ' + pos.row + ')');
-            }
+            func(block, i, j);
           }
         }
       }
+    };
+
+    var checkBlockGridConsistency = function() {
+      forAllBlocks(function(block, col, row) {
+        var pos = block.getPosition();
+        if (pos.col !== col || pos.row !== row) {
+          console.log('block[' + col + '][' + row + '] -> (' + pos.col + ', ' + pos.row + ')');
+        }
+      });
     };
 
     // public methods:
@@ -68,45 +98,33 @@
       g.closePath(); //top-left
     };
 
-    var getBlock = function(col, row) {
-      return _blockGrid[col][row];
-    };
-
-    // the block falls if it is able to
-    var dropBlock = function(col, row) {
-      if (row > 0 && getBlock(col, row - 1) === undefined) {
-        getBlock(col, row).setPosition(col, row - 1);
+    var makeBlocksFall = function() {
+      for (var col = 0; col < Grid.WIDTH; col++) {
+        var isFalling = false;
+        for (var row = Grid.HEIGHT - 1; row >= 0; row--) {
+          var block = getBlock(col, row);
+          if (block === undefined) {
+            isFalling = true;
+          } else {
+            if (isFalling && block.isSitting()) {
+              block.setState(window.BlockState.FALLING);
+            }
+          }
+        }
       }
     };
 
-
-    // create a new row of inactive blocks
-
-    var generateRow = function() {
-      for (var i = 0; i < Grid.WIDTH; i++) {
-        var randomnumber = Math.floor(Math.random() * 5);
-        self.createBlock(i, 0, randomnumber);
+    // make sure the two spots above are empty too
+    var canSwapIntoEmptyPosition = function(col, row) {
+      for (var rrow = row; rrow > row - 3; rrow--) {
+        if (rrow < 0) {
+          return true;
+        }
+        if (getBlock(col, rrow)) {
+          return false;
+        }
       }
-    };
-
-    /*
-      grid slowly moves up
-      at 1 block height:
-          - drop grid back to start position
-          - shift all blocks up
-          - create new row of blocks
-      */
-
-    var handleClimb = function() {
-      self.y -= Grid.CLIMB_SPEED;
-      _climbHeight += Grid.CLIMB_SPEED;
-      if (_climbHeight >= window.Block.HEIGHT) {
-        self.y += window.Block.HEIGHT;
-        _climbHeight -= window.Block.HEIGHT;
-        generateRow();
-        // TODO shift cursor up
-        _cursor.attemptMoveUp(); // hacky temp approach (avoid implicitely calling globals) this is only for checking the functionality
-      }
+      return true;
     };
 
 
@@ -115,9 +133,21 @@
     /////////////////////////////////
     // put a block into the blockGrid at position
     self.createBlock = function(col, row, blockType) {
-      if (!getBlock(col, row)) {
-        var block = new window.Block(this, col, row, blockType);
-        self.blockContainer.addChild(block.getShape());
+      var block = new window.Block(this, col, row, blockType);
+      self.blockContainer.addChild(block.getShape());
+    };
+
+    // create a new row of inactive blocks
+    self.generateRow = function() {
+      // move all blocks up by one
+      forAllBlocks(function(block, col, row) {
+        block.setPosition(col, row - 1);
+      });
+
+      var bottomRow = Grid.HEIGHT - 1;
+      for (var col = 0; col < Grid.WIDTH; col++) {
+        var randomnumber = Math.floor(Math.random() * 5);
+        self.createBlock(col, bottomRow, randomnumber);
       }
     };
 
@@ -127,13 +157,27 @@
         var leftBlock = getBlock(col, row);
         var rightBlock = getBlock(col + 1, row);
 
-        if (leftBlock) {
-          leftBlock.setState(window.BlockState.SWAPPING_RIGHT);
-          _isSwapping = true;
+        var leftBlockExists = leftBlock !== undefined;
+        var canSwapIntoLeftSpot = leftBlockExists && leftBlock.isSitting();
+        if (!leftBlockExists) {
+          canSwapIntoLeftSpot = canSwapIntoEmptyPosition(col, row);
         }
-        if (rightBlock) {
-          rightBlock.setState(window.BlockState.SWAPPING_LEFT);
-          _isSwapping = true;
+
+        var rightBlockExists = rightBlock !== undefined;
+        var canSwapIntoRightSpot = rightBlockExists && rightBlock.isSitting();
+        if (!rightBlockExists) {
+          canSwapIntoRightSpot = canSwapIntoEmptyPosition(col + 1, row);
+        }
+
+        if (canSwapIntoLeftSpot && canSwapIntoRightSpot) {
+          if (leftBlockExists) {
+            leftBlock.setState(window.BlockState.SWAPPING_RIGHT);
+            _isSwapping = true;
+          }
+          if (rightBlockExists) {
+            rightBlock.setState(window.BlockState.SWAPPING_LEFT);
+            _isSwapping = true;
+          }
         }
       }
     };
@@ -158,31 +202,14 @@
     };
 
     self.tick = function(event) {
-      //TODO climb will need refactored after implementing block statefullness -Matthew
-      // handleClimb();
+      forAllBlocks(function(block) {
+        block.tick(event);
+      });
 
-      //tick all blocks
-      for (var i = 0; i < Grid.WIDTH; i++) {
-        for (var j = 0; j < Grid.HEIGHT; j++) {
-          var block = getBlock(i, j);
-          if (block !== undefined) {
-            block.tick(event);
-            dropBlock(i, j);
-          }
-        }
-      }
-
-      // first unset blocks, then set blocks
-      var b2m;
-      for (i = 0; i < _blocksToMove.length; i++) {
-        b2m = _blocksToMove[i];
-        _blockGrid[b2m.oldCol][b2m.oldRow] = undefined;
-      }
-      for (i = 0; i < _blocksToMove.length; i++) {
-        b2m = _blocksToMove[i];
-        _blockGrid[b2m.col][b2m.row] = b2m.block;
-      }
+      applyBlocksToMove(_blocksToMove);
       _blocksToMove = [];
+
+      makeBlocksFall();
 
       if (window.DEBUG_MODE) {
         checkBlockGridConsistency();
@@ -196,7 +223,6 @@
     };
 
     initialize(cursorHandle);
-
   }
 
   // public properties:

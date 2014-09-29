@@ -1,11 +1,12 @@
 'use strict';
 
-(function(BlockState, createjs, Color, Grid) {
+(function(BlockState, createjs, Color) {
 
   function Block(grid, x, y, type) {
     var self = this;
 
     var SWAP_SPEED = 1;
+    var FALL_SPEED = 1;
 
     var _state,
       _color,
@@ -102,6 +103,18 @@
       makeShape();
     };
 
+    var fallDown = function() {
+      var targetY = (_row + 1) * Block.WIDTH;
+      var isDoneFalling = Math.abs(targetY - _shape.y) <= FALL_SPEED;
+      if (isDoneFalling) {
+        self.setPosition(_col, _row + 1);
+        _state = BlockState.SITTING;
+      } else {
+        _shape.y += FALL_SPEED;
+      }
+    };
+
+
     /////////////////////////////////
     ////// PUBLIC METHODS ///////////
     /////////////////////////////////
@@ -111,7 +124,7 @@
       _col = col;
       _row = row;
       _shape.x = col * Block.WIDTH;
-      _shape.y = (Grid.HEIGHT - row - 1) * Block.HEIGHT;
+      _shape.y = row * Block.HEIGHT;
 
       _grid.setBlockPosition(self, oldCol, oldRow, col, row);
     };
@@ -127,6 +140,10 @@
       _state = nstate;
     };
 
+    self.isSitting = function() {
+      return _state === BlockState.SITTING || _state === BlockState.CREATING;
+    };
+
     self.getShape = function() {
       return _shape;
     };
@@ -136,6 +153,8 @@
         swapToCol(_col - 1);
       } else if (_state === BlockState.SWAPPING_RIGHT) {
         swapToCol(_col + 1);
+      } else if (_state === BlockState.FALLING) {
+        fallDown();
       }
       if (window.DEBUG_MODE) {
         setDebugColor();
@@ -152,4 +171,4 @@
 
   window.Block = Block;
 
-}(window.BlockState, window.createjs, window.Color, window.Grid));
+}(window.BlockState, window.createjs, window.Color));
