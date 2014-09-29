@@ -1,20 +1,20 @@
 window.Init = (function() {
 
   // global variables
-  var cursor;
-  var grid;
+  var cursor1;
+  var cursor2;
+  var grid1;
+  var grid2;
 
-  function init(stage) {
-    cursor = new Cursor();
-    grid = new Grid(cursor);
+  function initGrid(x, y, cursor, grid, stage) {
     var gridContainer = grid.getContainer();
     stage.addChild(gridContainer);
-    gridContainer.x = 128;
-    gridContainer.y = 128;
+    gridContainer.x = x;
+    gridContainer.y = y;
     gridFrame = new GridFrame();
     stage.addChild(gridFrame);
-    gridFrame.x = 128;
-    gridFrame.y = 128;
+    gridFrame.x = x;
+    gridFrame.y = y;
 
     grid.createBlock(1, 0, 3);
     grid.createBlock(2, 0, 1);
@@ -29,6 +29,17 @@ window.Init = (function() {
 
     gridContainer.addChild(cursor);
     cursor.setLeftPosition(2, 3);
+
+
+  }
+
+  function init(stage) {
+    cursor1 = new Cursor();
+    grid1 = new Grid(cursor1);
+    cursor2 = new Cursor();
+    grid2 = new Grid(cursor2);
+    initGrid(64, 128, cursor1, grid1, stage);
+    initGrid(400, 128, cursor2, grid2, stage);
 
     window.onkeydown = handleKeyDown;
 
@@ -47,32 +58,33 @@ window.Init = (function() {
     switch (e.keyCode) {
       case KeyEvent.LEFT:
       case KeyEvent.A:
-        cursor.attemptMoveLeft();
+        cursor1.attemptMoveLeft();
         break;
       case KeyEvent.RIGHT:
       case KeyEvent.D:
-        cursor.attemptMoveRight();
+        cursor1.attemptMoveRight();
         break;
       case KeyEvent.UP:
       case KeyEvent.W:
-        cursor.attemptMoveUp();
+        cursor1.attemptMoveUp();
         break;
       case KeyEvent.DOWN:
       case KeyEvent.S:
-        cursor.attemptMoveDown();
+        cursor1.attemptMoveDown();
         break;
       case KeyEvent.X:
-        grid.generateRow();
+        grid1.generateRow();
         break;
       case KeyEvent.SPACE:
-        grid.swapBlocks(cursor.getCol(), cursor.getRow());
+        grid1.swapBlocks(cursor1.getCol(), cursor1.getRow());
         break;
     }
   }
 
   function tick(event) {
     //tick event
-    grid.tick(event);
+    grid1.tick(event);
+    grid2.tick(event);
   }
 
   return {
