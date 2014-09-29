@@ -7,9 +7,10 @@ window.Init = (function() {
   function init(stage) {
     cursor = new Cursor();
     grid = new Grid(cursor);
-    stage.addChild(grid);
-    grid.x = 128;
-    grid.y = 128;
+    var gridContainer = grid.getContainer();
+    stage.addChild(gridContainer);
+    gridContainer.x = 128;
+    gridContainer.y = 128;
     gridFrame = new GridFrame();
     stage.addChild(gridFrame);
     gridFrame.x = 128;
@@ -25,10 +26,8 @@ window.Init = (function() {
     grid.createBlock(2, 12, 2);
     grid.createBlock(3, 12, 2);
     grid.createBlock(3, 13, 2);
-    grid.swapBlocks(3, 3);
-    grid.swapBlocks(4, 3);
 
-    grid.addChild(cursor);
+    gridContainer.addChild(cursor);
     cursor.setLeftPosition(2, 3);
 
     window.onkeydown = handleKeyDown;

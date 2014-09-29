@@ -1,200 +1,210 @@
+'use strict';
+
 (function(window) {
 
   function Grid(cursorHandle) {
-    this.initialize();
-    this.cursor = cursorHandle;
-  }
 
-  var p = Grid.prototype = new createjs.Container();
+    var self = this;
+
+    var _cursor,
+      _isSwapping,
+      _blocksToMove,
+      _color,
+      _climbHeight,
+      _blockGrid,
+      _gridBody,
+      _container;
+
+    var initialize = function(cursorHandle) {
+
+      _cursor = cursorHandle;
+      _isSwapping = false;
+      _blocksToMove = [];
+
+      _container = new window.createjs.Container();
+
+      _color = '#0066cc';
+      _gridBody = new window.createjs.Shape();
+      _container.addChild(_gridBody);
+
+      makeShape();
+
+      _climbHeight = 0;
+
+      _blockGrid = [];
+      for (var i = 0; i < Grid.WIDTH; i++) {
+        _blockGrid[i] = [];
+      }
+
+      self.blockContainer = new window.createjs.Container();
+      _container.addChild(self.blockContainer);
+    };
+
+    var checkBlockGridConsistency = function() {
+      for (var col = 0; col < Grid.WIDTH; col++) {
+        for (var row = 0; row < Grid.HEIGHT; row++) {
+          var block = _blockGrid[col][row];
+          if (block !== undefined) {
+            var pos = block.getPosition();
+            if (pos.col !== col || pos.row !== row) {
+              console.log('block[' + col + '][' + row + '] -> (' + pos.col + ', ' + pos.row + ')');
+            }
+          }
+        }
+      }
+    };
+
+    // public methods:
+    var makeShape = function() {
+      //draw square outline for body
+      var g = _gridBody.graphics;
+      g.clear();
+      g.beginFill(_color);
+
+      g.moveTo(0, 0); //top-left
+      g.lineTo(Grid.WIDTH * window.Block.WIDTH, 0); //top-right
+      g.lineTo(Grid.WIDTH * window.Block.WIDTH, Grid.HEIGHT * window.Block.HEIGHT); //bottom-right
+      g.lineTo(0, Grid.HEIGHT * window.Block.HEIGHT); //bottom-left
+      g.closePath(); //top-left
+    };
+
+    var getBlock = function(col, row) {
+      return _blockGrid[col][row];
+    };
+
+    // the block falls if it is able to
+    var dropBlock = function(col, row) {
+      if (row > 0 && getBlock(col, row - 1) === undefined) {
+        getBlock(col, row).setPosition(col, row - 1);
+      }
+    };
+
+
+    // create a new row of inactive blocks
+
+    var generateRow = function() {
+      for (var i = 0; i < Grid.WIDTH; i++) {
+        var randomnumber = Math.floor(Math.random() * 5);
+        self.createBlock(i, 0, randomnumber);
+      }
+    };
+
+    /*
+      grid slowly moves up
+      at 1 block height:
+          - drop grid back to start position
+          - shift all blocks up
+          - create new row of blocks
+      */
+
+    var handleClimb = function() {
+      self.y -= Grid.CLIMB_SPEED;
+      _climbHeight += Grid.CLIMB_SPEED;
+      if (_climbHeight >= window.Block.HEIGHT) {
+        self.y += window.Block.HEIGHT;
+        _climbHeight -= window.Block.HEIGHT;
+        generateRow();
+        // TODO shift cursor up
+        _cursor.attemptMoveUp(); // hacky temp approach (avoid implicitely calling globals) this is only for checking the functionality
+      }
+    };
+
+
+    /////////////////////////////////
+    ////// PUBLIC METHODS ///////////
+    /////////////////////////////////
+    // put a block into the blockGrid at position
+    self.createBlock = function(col, row, blockType) {
+      if (!getBlock(col, row)) {
+        var block = new window.Block(this, col, row, blockType);
+        self.blockContainer.addChild(block.getShape());
+      }
+    };
+
+    // swap a block with block to the right
+    self.swapBlocks = function(col, row) {
+      if (!_isSwapping) {
+        var leftBlock = getBlock(col, row);
+        var rightBlock = getBlock(col + 1, row);
+
+        if (leftBlock) {
+          leftBlock.setState(window.BlockState.SWAPPING_RIGHT);
+          _isSwapping = true;
+        }
+        if (rightBlock) {
+          rightBlock.setState(window.BlockState.SWAPPING_LEFT);
+          _isSwapping = true;
+        }
+      }
+    };
+
+    // put the block into the appropriate blockgrid slot at the end of the tick
+    self.setBlockPosition = function(block, oldCol, oldRow, col, row) {
+      _blocksToMove.push({
+        oldCol: oldCol,
+        oldRow: oldRow,
+        col: col,
+        row: row,
+        block: block
+      });
+    };
+
+    self.setSwapping = function(isSwapping) {
+      _isSwapping = isSwapping;
+    };
+
+    self.getContainer = function() {
+      return _container;
+    };
+
+    self.tick = function(event) {
+      //TODO climb will need refactored after implementing block statefullness -Matthew
+      // handleClimb();
+
+      //tick all blocks
+      for (var i = 0; i < Grid.WIDTH; i++) {
+        for (var j = 0; j < Grid.HEIGHT; j++) {
+          var block = getBlock(i, j);
+          if (block !== undefined) {
+            block.tick(event);
+            dropBlock(i, j);
+          }
+        }
+      }
+
+      // first unset blocks, then set blocks
+      var b2m;
+      for (i = 0; i < _blocksToMove.length; i++) {
+        b2m = _blocksToMove[i];
+        _blockGrid[b2m.oldCol][b2m.oldRow] = undefined;
+      }
+      for (i = 0; i < _blocksToMove.length; i++) {
+        b2m = _blocksToMove[i];
+        _blockGrid[b2m.col][b2m.row] = b2m.block;
+      }
+      _blocksToMove = [];
+
+      if (window.DEBUG_MODE) {
+        checkBlockGridConsistency();
+        if (_isSwapping) {
+          _color = '#9966cc';
+        } else {
+          _color = '#0066cc';
+        }
+        makeShape();
+      }
+    };
+
+    initialize(cursorHandle);
+
+  }
 
   // public properties:
   Grid.WIDTH = 7;
   Grid.HEIGHT = 14;
-  Grid.CLIMB_SPEED = .5;
-
-  // public properties:
-  p.color;
-  p.gridBody;
-  p.climbHeight;
-  p.cursor;
-
-  // 2d array of blocks
-  p.blockGrid;
-
-  p.blockContainer;
-
-  // constructor:
-  p.Container_initialize = p.initialize; //unique to avoid overiding base class
-
-  p.initialize = function() {
-    this.Container_initialize();
-
-    this.color = "#0066cc";
-    this.gridBody = new createjs.Shape();
-    this.addChild(this.gridBody);
-
-    this.makeShape();
-
-    this.climbHeight = 0;
-
-    this.blockGrid = [];
-    for (var i = 0; i < Grid.WIDTH; i++) {
-      this.blockGrid[i] = [];
-    }
-
-    this.blockContainer = new createjs.Container();
-    this.addChild(this.blockContainer);
-  };
-
-  // public methods:
-  p.makeShape = function() {
-    //draw square outline for body
-    var g = this.gridBody.graphics;
-    g.clear();
-    g.beginFill(this.color);
-
-    g.moveTo(0, 0); //top-left
-    g.lineTo(Grid.WIDTH * Block.WIDTH, 0); //top-right
-    g.lineTo(Grid.WIDTH * Block.WIDTH, Grid.HEIGHT * Block.HEIGHT); //bottom-right
-    g.lineTo(0, Grid.HEIGHT * Block.HEIGHT); //bottom-left
-    g.closePath(); //top-left
-
-  };
-
-  // put a block into the blockGrid at position
-  p.createBlock = function(col, row, blockType) {
-
-    if (!this.getBlock(col, row)) {
-      var block = new window.Block(col, row, blockType);
-      this.blockGrid[col][row] = block;
-      block.setPosition(col, row);
-      block.setGrid(this);
-      this.blockContainer.addChild(block.shape);
-    }
-  };
-
-  // swap a block with block to the right
-  p.swapBlocks = function(col, row) {
-    block1 = this.getBlock(col, row);
-    block2 = this.getBlock(col + 1, row);
-
-    // TODO deal with swapping state
-
-    this.setBlockPosition(block1, col + 1, row);
-    this.setBlockPosition(block2, col, row);
-  };
-
-  // delete the block in position
-  p.deleteBlock = function(col, row) {
-    this.blockGrid[col][row] = undefined;
-    //remove block container
-  };
-
-  // set the blocks x and y coords based on grid cell
-  p.setBlockPosition = function(block, col, row) {
-    if (block !== undefined) {
-      block.setPosition(col, row);
-    }
-    this.blockGrid[col][row] = block;
-  };
-
-  p.getBlock = function(col, row) {
-    return this.blockGrid[col][row];
-  };
-
-  // the block falls if it is able to
-  p.dropBlock = function(col, row) {
-    if (row > 0 && this.getBlock(col, row - 1) == undefined) {
-      block1 = this.getBlock(col, row);
-      block2 = undefined
-
-      // TODO deal with falling state
-
-      this.setBlockPosition(block1, col, row - 1);
-      this.setBlockPosition(block2, col, row);
-    }
-  };
-
-  // blocks fall up
-  p.raiseBlock = function(col, row) {
-    if (row < Grid.HEIGHT && this.getBlock(col, row + 1) == undefined) {
-      block1 = this.getBlock(col, row);
-      block2 = undefined
-
-      // TODO states
-
-      this.setBlockPosition(block1, col, row + 1);
-      this.setBlockPosition(block2, col, row);
-    }
-  };
-
-
-  // create a new row of inactive blocks
-
-  p.generateRow = function() {
-    for (var i = 0; i < Grid.WIDTH; i++) {
-      var randomnumber = Math.floor(Math.random() * 5)
-      this.createBlock(i, 0, randomnumber);
-    }
-
-  };
-
-  // shift all blocks up 1 grid coordinate
-
-  p.shiftAllBlocksUp = function() {
-    for (var i = 0; i < Grid.WIDTH; i++) {
-      for (var j = Grid.HEIGHT - 2; j >= 0; j--) {
-        this.raiseBlock(i, j);
-      }
-    }
-  };
-
-  /*
-    grid slowly moves up
-    at 1 block height:
-        - drop grid back to start position
-        - shift all blocks up
-        - create new row of blocks
-    */
-
-  p.handleClimb = function() {
-    this.y -= Grid.CLIMB_SPEED;
-    this.climbHeight += Grid.CLIMB_SPEED;
-    if (this.climbHeight >= Block.HEIGHT) {
-      this.shiftAllBlocksUp();
-      this.y += Block.HEIGHT;
-      this.climbHeight -= Block.HEIGHT;
-      this.generateRow();
-      // TODO shift cursor up
-      this.cursor.attemptMoveUp(); // hacky temp approach (avoid implicitely calling globals) this is only for checking the functionality
-    }
-  };
-
-  // check block to find matches
-  p.getMatch = function(col, row) {
-    //while (
-
-  };
-
-  p.tick = function(event) {
-    //TODO climb will need refactored after implementing block statefullness -Matthew
-    this.handleClimb();
-
-    //block.tick(event); // disabled until further notice -Matthew
-
-    //tick all blocks
-    //try to let blocks fall
-    for (var i = 0; i < Grid.WIDTH; i++) {
-      for (var j = 1; j < Grid.HEIGHT; j++) {
-        block = this.getBlock(i, j);
-        if (block !== undefined) {
-          block.tick(event);
-          this.dropBlock(i, j);
-        }
-      }
-    }
-  };
+  Grid.CLIMB_SPEED = 0.5;
 
   window.Grid = Grid;
+  window.DEBUG_MODE = true;
 
 }(window));
