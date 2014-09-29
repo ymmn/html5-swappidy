@@ -17,8 +17,8 @@
     var f = this.gridFrame.graphics;
     f.clear();
     f.beginFill("ffffff"); //bottom bar
-    f.moveTo(0, (Grid.HEIGHT - 1) * Block.HEIGHT); //top-left
-    f.lineTo(Grid.WIDTH * Block.HEIGHT, (Grid.HEIGHT - 1) * Block.HEIGHT);
+    f.moveTo(0, (Grid.HEIGHT) * Block.HEIGHT); //top-left
+    f.lineTo(Grid.WIDTH * Block.HEIGHT, (Grid.HEIGHT) * Block.HEIGHT);
     f.lineTo(Grid.WIDTH * Block.HEIGHT, (Grid.HEIGHT + 1) * Block.HEIGHT);
     f.lineTo(0, (Grid.HEIGHT + 1) * Block.HEIGHT);
     f.closePath(); //top bar

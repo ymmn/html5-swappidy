@@ -61,6 +61,9 @@ window.Init = (function() {
       case KeyEvent.S:
         cursor.attemptMoveDown();
         break;
+      case KeyEvent.X:
+        grid.generateRow();
+        break;
       case KeyEvent.SPACE:
         grid.swapBlocks(cursor.getCol(), cursor.getRow());
         break;
