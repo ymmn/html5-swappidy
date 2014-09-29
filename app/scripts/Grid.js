@@ -16,6 +16,7 @@
 
     // private methods
     var getBlock,
+      removeBlock,
       applyBlocksToMove;
 
     var initialize = function(cursorHandle) {
@@ -48,6 +49,12 @@
 
       getBlock = function(col, row) {
         return _blockGrid[col][row];
+      };
+
+      removeBlock = function(block) {
+        var pos = block.getPosition();
+        _blockGrid[pos.col][pos.row] = undefined;
+        self.blockContainer.removeChild(block.getShape());
       };
 
       applyBlocksToMove = function(blocksToMove) {
@@ -125,6 +132,75 @@
         }
       }
       return true;
+    };
+
+    var blockMatchesColor = function(col, row, color) {
+      var myblock = getBlock(col, row);
+      if (myblock && myblock.isSitting()) {
+        return myblock.getColor() === color;
+      }
+      return false;
+    };
+
+    var findMatchesCenteredOnPosition = function(col, row) {
+      var myblock = getBlock(col, row);
+      var matchingBlocks = [];
+
+      if (myblock && myblock.isSitting()) {
+        var mycolor = myblock.getColor();
+        // look to the left
+        var curCol = col - 1;
+        var matchesOnLeft = [];
+        while (curCol >= 0 && blockMatchesColor(curCol, row, mycolor)) {
+          matchesOnLeft.push(getBlock(curCol, row));
+          curCol--;
+        }
+        // look to the right
+        curCol = col + 1;
+        var matchesOnRight = [];
+        while (curCol < Grid.WIDTH && blockMatchesColor(curCol, row, mycolor)) {
+          matchesOnRight.push(getBlock(curCol, row));
+          curCol++;
+        }
+        // look below
+        var curRow = row + 1;
+        var matchesBelow = [];
+        while (curRow < Grid.HEIGHT && blockMatchesColor(col, curRow, mycolor)) {
+          matchesBelow.push(getBlock(col, curRow));
+          curRow++;
+        }
+        // look up
+        curRow = row - 1;
+        var matchesAbove = [];
+        while (curRow >= 0 && blockMatchesColor(col, curRow, mycolor)) {
+          matchesAbove.push(getBlock(col, curRow));
+          curRow--;
+        }
+
+        var foundHorizontalMatch = (matchesOnLeft.length + matchesOnRight.length) >= 2;
+        var foundVerticalMatch = (matchesAbove.length + matchesBelow.length) >= 2;
+
+        if (foundHorizontalMatch) {
+          matchingBlocks = matchesOnRight.concat(matchesOnLeft).concat([myblock]);
+        }
+        if (foundVerticalMatch) {
+          matchingBlocks = matchesAbove.concat(matchesBelow).concat([myblock]);
+        }
+      }
+
+      return matchingBlocks;
+    };
+
+    var makeBlocksMatch = function() {
+      var matches = [];
+      forAllBlocks(function(block, col, row) {
+        matches = matches.concat(findMatchesCenteredOnPosition(col, row));
+      });
+      for (var i = 0; i < matches.length; i++) {
+        var matchedBlock = matches[i];
+        matchedBlock.setState(window.BlockState.DYING);
+        removeBlock(matchedBlock);
+      }
     };
 
 
@@ -210,6 +286,7 @@
       _blocksToMove = [];
 
       makeBlocksFall();
+      makeBlocksMatch();
 
       if (window.DEBUG_MODE) {
         checkBlockGridConsistency();
@@ -231,6 +308,6 @@
   Grid.CLIMB_SPEED = 0.5;
 
   window.Grid = Grid;
-  window.DEBUG_MODE = true;
+  // window.DEBUG_MODE = true;
 
 }(window));

@@ -136,6 +136,10 @@
       };
     };
 
+    self.getColor = function() {
+      return _type;
+    };
+
     self.setState = function(nstate) {
       _state = nstate;
     };
