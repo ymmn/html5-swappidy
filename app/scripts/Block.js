@@ -7,6 +7,9 @@
 
     var SWAP_SPEED = 1;
     var FALL_SPEED = 1;
+    var BLOCK_BITMAPS = [
+      'images/assets/gblock_32.png'
+    ];
 
     var _state,
       _color,
@@ -14,14 +17,22 @@
       _row,
       _type,
       _grid,
-      _shape;
+      _shape,
+      _isBitmap;
 
     var initialize = function(grid, x, y, type) {
       _state = BlockState.CREATING;
-      _shape = new createjs.Shape();
       _color = '#ff0000';
       _col = 0;
       _row = 0;
+
+      var bitmap = BLOCK_BITMAPS[type];
+      if (bitmap && !window.DEBUG_MODE) {
+        _isBitmap = true;
+        _shape = new createjs.Bitmap(bitmap);
+      } else {
+        _shape = new createjs.Shape();
+      }
 
       _grid = grid;
       self.setPosition(x, y);
@@ -68,17 +79,18 @@
 
     var makeShape = function() {
       //draw square outline for body
-      var g = _shape.graphics;
-      g.clear();
-      g.beginFill(_color);
-      g.beginStroke('#fff');
-      g.setStrokeStyle(1.5);
-      g.moveTo(0, 0); //top-left
-      g.lineTo(Block.WIDTH, 0); //top-right
-      g.lineTo(Block.WIDTH, Block.HEIGHT); //bottom-right
-      g.lineTo(0, Block.HEIGHT); //bottom-left
-      g.closePath(); //top-left
-
+      if (!_isBitmap) {
+        var g = _shape.graphics;
+        g.clear();
+        g.beginFill(_color);
+        g.beginStroke('#fff');
+        g.setStrokeStyle(1.5);
+        g.moveTo(0, 0); //top-left
+        g.lineTo(Block.WIDTH, 0); //top-right
+        g.lineTo(Block.WIDTH, Block.HEIGHT); //bottom-right
+        g.lineTo(0, Block.HEIGHT); //bottom-left
+        g.closePath(); //top-left
+      }
     };
 
     var setType = function(blockType) {
