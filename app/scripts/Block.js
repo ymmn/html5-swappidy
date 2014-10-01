@@ -8,7 +8,11 @@
     var SWAP_SPEED = 1;
     var FALL_SPEED = 1;
     var BLOCK_BITMAPS = [
-      'images/assets/gblock_32.png'
+      'images/assets/gblock_32.png',
+      'images/assets/rblock_32.png',
+      'images/assets/bblock_32.png',
+      'images/assets/pblock_32.png',
+      'images/assets/yblock_32.png'
     ];
 
     var _state,
