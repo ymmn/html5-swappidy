@@ -6,6 +6,26 @@ window.Init = (function() {
   var grid1;
   var grid2;
 
+  // initial grid state
+  // -1 for no block
+  // values 0-4 for block type
+  var hardCodedGrid = [
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1,
+    -1, -1,  3,  3,  2, -1, -1
+  ];
+
   function initGrid(x, y, cursor, grid, stage) {
     var gridContainer = grid.getContainer();
     stage.addChild(gridContainer);
@@ -16,16 +36,14 @@ window.Init = (function() {
     gridFrame.x = x;
     gridFrame.y = y;
 
-    grid.createBlock(1, 0, 3);
-    grid.createBlock(2, 0, 1);
-    grid.createBlock(2, 2, 2);
-    grid.createBlock(3, 2, 2);
-    grid.createBlock(3, 3, 2);
-    grid.createBlock(1, 10, 3);
-    grid.createBlock(2, 10, 1);
-    grid.createBlock(2, 12, 2);
-    grid.createBlock(3, 12, 2);
-    grid.createBlock(3, 13, 2);
+    // iterates through grid and inserts block for non -1 values
+    for (var i = 0; i < hardCodedGrid.length; i++) {
+      if (hardCodedGrid[i] >= 0) {
+        var xPos = i % 7;
+        var yPos = Math.floor(i / 7);
+        grid.createBlock(xPos, yPos, hardCodedGrid[i]);
+      }
+    }
 
     gridContainer.addChild(cursor);
     cursor.setLeftPosition(2, 3);
