@@ -9,7 +9,7 @@ window.Init = (function() {
   // initial grid state
   // -1 for no block
   // values 0-4 for block type
-  var hardCodedGrid = [
+  var INITIAL_GRID = [
     -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1,
@@ -36,12 +36,15 @@ window.Init = (function() {
     gridFrame.x = x;
     gridFrame.y = y;
 
-    // iterates through grid and inserts block for non -1 values
-    for (var i = 0; i < hardCodedGrid.length; i++) {
-      if (hardCodedGrid[i] >= 0) {
-        var xPos = i % 7;
-        var yPos = Math.floor(i / 7);
-        grid.createBlock(xPos, yPos, hardCodedGrid[i]);
+    if (window.DEBUG_MODE) {
+      // iterates through grid and inserts block for non -1 values
+      for (var i = 0; i < Grid.WIDTH * Grid.HEIGHT; i++) {
+        if (INITIAL_GRID[i] >= 0) {
+          var xPos = i % 7;
+          var yPos = Math.floor(i / 7);
+          var blockType = INITIAL_GRID[i];
+          grid.createBlock(xPos, yPos, blockType);
+        }
       }
     }
 

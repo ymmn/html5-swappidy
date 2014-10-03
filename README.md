@@ -9,6 +9,6 @@ To run the game, do the following:
 
 3) run 'npm install'
 
-4) run 'bower install'
+4) run 'bower install' (npm install bower)
 
-5) run 'grunt serve'
+5) run 'grunt serve' (npm install grunt-cli)
