@@ -23,8 +23,7 @@ window.Init = (function() {
     -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1,
-    -1, -1,  3,  3,  2, -1, -1
-  ];
+    -1, -1,  3,  3,  2, -1, -1];
 
   function initGrid(x, y, cursor, grid, stage) {
     var gridContainer = grid.getContainer();
@@ -40,8 +39,8 @@ window.Init = (function() {
       // iterates through grid and inserts block for non -1 values
       for (var i = 0; i < Grid.WIDTH * Grid.HEIGHT; i++) {
         if (INITIAL_GRID[i] >= 0) {
-          var xPos = i % 7;
-          var yPos = Math.floor(i / 7);
+          var xPos = i % Grid.WIDTH;
+          var yPos = Math.floor(i / Grid.WIDTH);
           var blockType = INITIAL_GRID[i];
           grid.createBlock(xPos, yPos, blockType);
         }
