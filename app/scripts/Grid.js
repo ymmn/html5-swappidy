@@ -308,6 +308,6 @@
   Grid.CLIMB_SPEED = 0.5;
 
   window.Grid = Grid;
-  // window.DEBUG_MODE = true;
+//  window.DEBUG_MODE = true;
 
 }(window));
