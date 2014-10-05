@@ -12,7 +12,8 @@
       _blocksToMove,
       _color,
       _gridBody,
-      _container;
+      _container,
+      _announcement;
 
     // private methods
     var getBlock,
@@ -37,6 +38,9 @@
 
       self.blockContainer = new window.createjs.Container();
       _container.addChild(self.blockContainer);
+
+      _announcement = new window.Announcement();
+      _container.addChild(_announcement.getContainer());
     };
 
     // the block grid should not be hand edited, hence being enclosed
@@ -196,10 +200,19 @@
       forAllBlocks(function(block, col, row) {
         matches = matches.concat(findMatchesCenteredOnPosition(col, row));
       });
+
+      var isUnique = function(value, index, self) {
+        return self.indexOf(value) === index;
+      };
+
+      matches = matches.filter(isUnique);
       for (var i = 0; i < matches.length; i++) {
         var matchedBlock = matches[i];
         matchedBlock.setState(window.BlockState.DYING);
         removeBlock(matchedBlock);
+      }
+      if (matches.length > 3) {
+        _announcement.announce(matches.length + ' COMBO');
       }
     };
 
@@ -287,6 +300,7 @@
 
       makeBlocksFall();
       makeBlocksMatch();
+      _announcement.tick();
 
       if (window.DEBUG_MODE) {
         checkBlockGridConsistency();
@@ -308,6 +322,6 @@
   Grid.CLIMB_SPEED = 0.5;
 
   window.Grid = Grid;
-//  window.DEBUG_MODE = true;
+  //  window.DEBUG_MODE = true;
 
 }(window));
