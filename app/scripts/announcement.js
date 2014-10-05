@@ -3,7 +3,7 @@
 (function(window) {
 
   function Announcement() {
-    var TICKS_TO_DISAPPEAR = 30 * 3;
+    var DURATION_IN_TICKS = 30 * 3;
     var self = this;
 
     var _container,
@@ -27,7 +27,7 @@
     self.tick = function() {
       for (var i = 0; i < _txtShapes.length; i++) {
         var txt = _txtShapes[i];
-        txt.alpha -= (1 / TICKS_TO_DISAPPEAR);
+        txt.alpha -= (1 / DURATION_IN_TICKS);
         if (txt.alpha <= 0) {
           _container.removeChild(txt);
           _txtShapes = _txtShapes.slice(1);
