@@ -2,7 +2,7 @@
 
 (function(BlockState, createjs, Color) {
 
-  function Block(grid, x, y, type) {
+  function Block(setBlockPosition, x, y, type) {
     var self = this;
 
     var SWAP_SPEED = 1;
@@ -20,11 +20,12 @@
       _col,
       _row,
       _type,
-      _grid,
       _shape,
-      _isBitmap;
+      _isBitmap,
+      _setBlockPosition,
+      _onSwapCompleteCb;
 
-    var initialize = function(grid, x, y, type) {
+    var initialize = function(setBlockPosition, x, y, type) {
       _state = BlockState.CREATING;
       _color = '#ff0000';
       _col = 0;
@@ -38,7 +39,7 @@
         _shape = new createjs.Shape();
       }
 
-      _grid = grid;
+      _setBlockPosition = setBlockPosition;
       self.setPosition(x, y);
       setType(type);
 
@@ -51,8 +52,11 @@
       var doneSwapping = Math.abs(targetX - _shape.x) <= SWAP_SPEED;
       if (doneSwapping) {
         self.setPosition(targetCol, _row);
-        self.setState(BlockState.SITTING);
-        _grid.setSwapping(false);
+        _state = BlockState.SITTING;
+        if (_onSwapCompleteCb) {
+          _onSwapCompleteCb();
+          _onSwapCompleteCb = null;
+        }
       } else {
         _shape.x += direction * SWAP_SPEED;
       }
@@ -130,6 +134,15 @@
       }
     };
 
+    var swap = function(newState) {
+      _state = newState;
+      return {
+        then: function(onSwapComplete) {
+          _onSwapCompleteCb = onSwapComplete;
+        }
+      };
+    };
+
 
     /////////////////////////////////
     ////// PUBLIC METHODS ///////////
@@ -142,7 +155,7 @@
       _shape.x = col * Block.WIDTH;
       _shape.y = row * Block.HEIGHT;
 
-      _grid.setBlockPosition(self, oldCol, oldRow, col, row);
+      _setBlockPosition(self, oldCol, oldRow, col, row);
     };
 
     self.getPosition = function() {
@@ -156,8 +169,20 @@
       return _type;
     };
 
-    self.setState = function(nstate) {
-      _state = nstate;
+    self.swapLeft = function() {
+      swap(BlockState.SWAPPING_LEFT);
+    };
+
+    self.swapRight = function() {
+      swap(BlockState.SWAPPING_RIGHT);
+    };
+
+    self.fallDown = function() {
+      _state = BlockState.FALLING;
+    };
+
+    self.die = function() {
+      _state = BlockState.DYING;
     };
 
     self.isSitting = function() {
@@ -182,12 +207,13 @@
       }
     };
 
-    initialize(grid, x, y, type);
+    initialize(setBlockPosition, x, y, type);
   }
 
   // public properties:
   Block.WIDTH = 32;
   Block.HEIGHT = 32;
+  Block.NUM_DIFFERENT_TYPES = 5;
 
   window.Block = Block;
 
