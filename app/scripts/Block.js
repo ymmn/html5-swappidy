@@ -170,11 +170,11 @@
     };
 
     self.swapLeft = function() {
-      swap(BlockState.SWAPPING_LEFT);
+      return swap(BlockState.SWAPPING_LEFT);
     };
 
     self.swapRight = function() {
-      swap(BlockState.SWAPPING_RIGHT);
+      return swap(BlockState.SWAPPING_RIGHT);
     };
 
     self.fallDown = function() {
