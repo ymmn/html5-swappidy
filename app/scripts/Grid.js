@@ -118,7 +118,7 @@
             isFalling = true;
           } else {
             if (isFalling && block.isSitting()) {
-              block.setState(window.BlockState.FALLING);
+              block.fallDown();
             }
           }
         }
@@ -181,8 +181,8 @@
           curRow--;
         }
 
-        var foundHorizontalMatch = (matchesOnLeft.length + matchesOnRight.length) >= 2;
-        var foundVerticalMatch = (matchesAbove.length + matchesBelow.length) >= 2;
+        var foundHorizontalMatch = (matchesOnLeft.length + 1 + matchesOnRight.length) >= Grid.MIN_MATCH_LENGTH;
+        var foundVerticalMatch = (matchesAbove.length + 1 + matchesBelow.length) >= Grid.MIN_MATCH_LENGTH;
 
         if (foundHorizontalMatch) {
           matchingBlocks = matchesOnRight.concat(matchesOnLeft).concat([myblock]);
@@ -208,12 +208,23 @@
       matches = matches.filter(isUnique);
       for (var i = 0; i < matches.length; i++) {
         var matchedBlock = matches[i];
-        matchedBlock.setState(window.BlockState.DYING);
+        matchedBlock.die();
         removeBlock(matchedBlock);
       }
-      if (matches.length > 3) {
+      if (matches.length >= Grid.MIN_ANNOUNCED_COMBO_LENGTH) {
         _announcement.announce(matches.length + ' COMBO');
       }
+    };
+
+    // put the block into the appropriate blockgrid slot at the end of the tick
+    var setBlockPosition = function(block, oldCol, oldRow, col, row) {
+      _blocksToMove.push({
+        oldCol: oldCol,
+        oldRow: oldRow,
+        col: col,
+        row: row,
+        block: block
+      });
     };
 
 
@@ -222,7 +233,7 @@
     /////////////////////////////////
     // put a block into the blockGrid at position
     self.createBlock = function(col, row, blockType) {
-      var block = new window.Block(this, col, row, blockType);
+      var block = new window.Block(setBlockPosition, col, row, blockType);
       self.blockContainer.addChild(block.getShape());
     };
 
@@ -235,7 +246,7 @@
 
       var bottomRow = Grid.HEIGHT - 1;
       for (var col = 0; col < Grid.WIDTH; col++) {
-        var randomnumber = Math.floor(Math.random() * 5);
+        var randomnumber = Math.floor(Math.random() * window.Block.NUM_DIFFERENT_TYPES);
         self.createBlock(col, bottomRow, randomnumber);
       }
     };
@@ -258,32 +269,21 @@
           canSwapIntoRightSpot = canSwapIntoEmptyPosition(col + 1, row);
         }
 
+        var onSwapComplete = function() {
+          _isSwapping = false;
+        };
+
         if (canSwapIntoLeftSpot && canSwapIntoRightSpot) {
           if (leftBlockExists) {
-            leftBlock.setState(window.BlockState.SWAPPING_RIGHT);
+            leftBlock.swapRight().then(onSwapComplete);
             _isSwapping = true;
           }
           if (rightBlockExists) {
-            rightBlock.setState(window.BlockState.SWAPPING_LEFT);
+            rightBlock.swapLeft().then(onSwapComplete);
             _isSwapping = true;
           }
         }
       }
-    };
-
-    // put the block into the appropriate blockgrid slot at the end of the tick
-    self.setBlockPosition = function(block, oldCol, oldRow, col, row) {
-      _blocksToMove.push({
-        oldCol: oldCol,
-        oldRow: oldRow,
-        col: col,
-        row: row,
-        block: block
-      });
-    };
-
-    self.setSwapping = function(isSwapping) {
-      _isSwapping = isSwapping;
     };
 
     self.getContainer = function() {
@@ -298,6 +298,13 @@
       applyBlocksToMove(_blocksToMove);
       _blocksToMove = [];
 
+
+      // this shotgun approach is suboptimal.
+      // we should keep track of which blocks
+      // might potentially be need to fall, which
+      // need to be checked for a match, etc.
+      // most ticks, there will be nothing to do, so
+      // this is pretty wasteful
       makeBlocksFall();
       makeBlocksMatch();
       _announcement.tick();
@@ -320,6 +327,8 @@
   Grid.WIDTH = 7;
   Grid.HEIGHT = 14;
   Grid.CLIMB_SPEED = 0.5;
+  Grid.MIN_MATCH_LENGTH = 3;
+  Grid.MIN_ANNOUNCED_COMBO_LENGTH = 4;
 
   window.Grid = Grid;
   //  window.DEBUG_MODE = true;
