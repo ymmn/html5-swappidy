@@ -7,6 +7,7 @@
 
     var SWAP_SPEED = 10;
     var FALL_SPEED = 10;
+    var FALL_PAUSE = 10;
     var BLOCK_BITMAPS = [
       'images/assets/gblock_32.png',
       'images/assets/rblock_32.png',
@@ -66,6 +67,9 @@
       switch (_state) {
         case BlockState.CREATING:
           _color = 'green';
+          break;
+        case BlockState.PRE_FALLING:
+          _color = 'aqua';
           break;
         case BlockState.FALLING:
           _color = 'blue';
@@ -128,7 +132,6 @@
       var isDoneFalling = Math.abs(targetY - _shape.y) <= FALL_SPEED;
       if (isDoneFalling) {
         self.setPosition(_col, _row + 1);
-        _state = BlockState.SITTING;
       } else {
         _shape.y += FALL_SPEED;
       }
@@ -178,7 +181,13 @@
     };
 
     self.fallDown = function() {
-      _state = BlockState.FALLING;
+      _state = _state === BlockState.FALLING ? BlockState.FALLING : BlockState.PRE_FALLING;
+    };
+
+    self.stopFalling = function() {
+      if (_state === BlockState.FALLING) {
+        _state = BlockState.SITTING;
+      }
     };
 
     self.die = function() {
@@ -194,12 +203,22 @@
     };
 
     self.tick = function() {
-      if (_state === BlockState.SWAPPING_LEFT) {
-        swapToCol(_col - 1);
-      } else if (_state === BlockState.SWAPPING_RIGHT) {
-        swapToCol(_col + 1);
-      } else if (_state === BlockState.FALLING) {
-        fallDown();
+      switch(_state) {
+        case BlockState.SWAPPING_LEFT:
+          swapToCol(_col - 1);
+          break;
+        case BlockState.SWAPPING_RIGHT:
+          swapToCol(_col + 1);
+          break;
+        case BlockState.PRE_FALLING:
+          if (FALL_PAUSE-- === 0) {
+            FALL_PAUSE = 10;
+            _state = BlockState.FALLING;
+          }
+          break;
+        case BlockState.FALLING:
+          fallDown();
+          break;
       }
       if (window.DEBUG_MODE) {
         setDebugColor();

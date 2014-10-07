@@ -117,8 +117,10 @@
           if (block === undefined) {
             isFalling = true;
           } else {
-            if (isFalling && block.isSitting()) {
+            if (isFalling) {
               block.fallDown();
+            } else {
+              block.stopFalling();
             }
           }
         }
@@ -331,6 +333,6 @@
   Grid.MIN_ANNOUNCED_COMBO_LENGTH = 4;
 
   window.Grid = Grid;
-  //  window.DEBUG_MODE = true;
+    window.DEBUG_MODE = true;
 
 }(window));

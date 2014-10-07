@@ -6,6 +6,7 @@
  */
 window.BlockState = {
   CREATING: 0,
+  PRE_FALLING: 0.5,
   FALLING: 1,
   SITTING: 2,
   INCUBATING: 3,
