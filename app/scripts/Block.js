@@ -5,8 +5,8 @@
   function Block(setBlockPosition, x, y, type) {
     var self = this;
 
-    var SWAP_SPEED = 1;
-    var FALL_SPEED = 1;
+    var SWAP_SPEED = 10;
+    var FALL_SPEED = 10;
     var BLOCK_BITMAPS = [
       'images/assets/gblock_32.png',
       'images/assets/rblock_32.png',
