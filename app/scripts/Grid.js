@@ -9,7 +9,7 @@
     // private members
     var _cursor,
       _isSwapping,
-      _blocksToMove,
+      _blocksToMove,// this variable should be used for all or no blocks, not just CREATED ones
       _color,
       _gridBody,
       _container,
@@ -211,7 +211,7 @@
       for (var i = 0; i < matches.length; i++) {
         var matchedBlock = matches[i];
         matchedBlock.die();
-        removeBlock(matchedBlock);
+//        removeBlock(matchedBlock);
       }
       if (matches.length >= Grid.MIN_ANNOUNCED_COMBO_LENGTH) {
         _announcement.announce(matches.length + ' COMBO');

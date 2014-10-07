@@ -8,6 +8,7 @@
     var SWAP_SPEED = 10;
     var FALL_SPEED = 10;
     var FALL_PAUSE = 10;
+    var DIE_PAUSE = 10;
     var BLOCK_BITMAPS = [
       'images/assets/gblock_32.png',
       'images/assets/rblock_32.png',
@@ -24,7 +25,10 @@
       _shape,
       _isBitmap,
       _setBlockPosition,
-      _onSwapCompleteCb;
+      _onSwapCompleteCb,
+      _fallCounter = FALL_PAUSE,
+      _dieCounter = DIE_PAUSE;
+    // block should keep track of nearest neighbor on all four sides
 
     var initialize = function(setBlockPosition, x, y, type) {
       _state = BlockState.CREATING;
@@ -66,7 +70,7 @@
     var setDebugColor = function() {
       switch (_state) {
         case BlockState.CREATING:
-          _color = 'green';
+          _color = 'yellow';
           break;
         case BlockState.PRE_FALLING:
           _color = 'aqua';
@@ -83,8 +87,10 @@
         case BlockState.SWAPPING_RIGHT:
           _color = 'purple';
           break;
+        case BlockState.PRE_DYING:
+          _color = 'lime';
         case BlockState.DYING:
-          _color = 'yellow';
+          _color = 'green';
           break;
       }
     };
@@ -191,7 +197,7 @@
     };
 
     self.die = function() {
-      _state = BlockState.DYING;
+      _state = BlockState.PRE_DYING;
     };
 
     self.isSitting = function() {
@@ -211,14 +217,19 @@
           swapToCol(_col + 1);
           break;
         case BlockState.PRE_FALLING:
-          if (FALL_PAUSE-- === 0) {
-            FALL_PAUSE = 10;
+          if (_fallCounter-- === 0) {
+            _fallCounter = 10;
             _state = BlockState.FALLING;
           }
           break;
         case BlockState.FALLING:
           fallDown();
           break;
+        case BlockState.PRE_DYING:
+          if (_dieCounter-- === 0) {
+            _dieCounter = 10;
+            _state = BlockState.DYING;
+          }
       }
       if (window.DEBUG_MODE) {
         setDebugColor();

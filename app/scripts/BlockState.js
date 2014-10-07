@@ -12,6 +12,7 @@ window.BlockState = {
   INCUBATING: 3,
   SWAPPING_LEFT: 4,
   SWAPPING_RIGHT: 7,
+  PRE_DYING: 4.5,
   DYING: 5,
   GONE: 6
 };
