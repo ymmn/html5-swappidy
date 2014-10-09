@@ -7,6 +7,7 @@
 
     var SWAP_SPEED = 1;
     var FALL_SPEED = 1;
+    var FADE_SPEED = 0.05;
     var BLOCK_BITMAPS = [
       'images/assets/gblock_32.png',
       'images/assets/rblock_32.png',
@@ -143,6 +144,14 @@
       };
     };
 
+    var fadeOut = function() {
+      var isFadedOut = (_shape.alpha <= 0);
+      if (isFadedOut) {
+        _state = BlockState.GONE;
+      } else {
+        _shape.alpha -= FADE_SPEED;
+      }
+    }
 
     /////////////////////////////////
     ////// PUBLIC METHODS ///////////
@@ -189,6 +198,10 @@
       return _state === BlockState.SITTING || _state === BlockState.CREATING;
     };
 
+    self.isFaded = function() {
+      return _state === BlockState.GONE;
+    }
+
     self.getShape = function() {
       return _shape;
     };
@@ -200,6 +213,8 @@
         swapToCol(_col + 1);
       } else if (_state === BlockState.FALLING) {
         fallDown();
+      } else if (_state === BlockState.DYING) {
+        fadeOut();
       }
       if (window.DEBUG_MODE) {
         setDebugColor();

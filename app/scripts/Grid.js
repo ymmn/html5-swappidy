@@ -124,6 +124,14 @@
         }
       }
     };
+    
+    var removeFadedBlocks = function() {
+      forAllBlocks(function(block, row, col) {
+        if (block.isFaded()) {
+          removeBlock(block);
+        }
+      });
+    };
 
     // make sure the two spots above are empty too
     var canSwapIntoEmptyPosition = function(col, row) {
@@ -209,7 +217,6 @@
       for (var i = 0; i < matches.length; i++) {
         var matchedBlock = matches[i];
         matchedBlock.die();
-        removeBlock(matchedBlock);
       }
       if (matches.length >= Grid.MIN_ANNOUNCED_COMBO_LENGTH) {
         _announcement.announce(matches.length + ' COMBO');
@@ -306,6 +313,7 @@
       // most ticks, there will be nothing to do, so
       // this is pretty wasteful
       makeBlocksFall();
+      removeFadedBlocks();
       makeBlocksMatch();
       _announcement.tick();
 
