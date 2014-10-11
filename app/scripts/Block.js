@@ -24,6 +24,7 @@
       _shape,
       _isBitmap,
       _setBlockPosition,
+      _onDieCompleteCb,
       _onSwapCompleteCb;
 
     var initialize = function(setBlockPosition, x, y, type) {
@@ -147,7 +148,10 @@
     var fadeOut = function() {
       var isFadedOut = (_shape.alpha <= 0);
       if (isFadedOut) {
-        _state = BlockState.GONE;
+        if (_onDieCompleteCb) {
+          _onDieCompleteCb(self);
+          _onDieCompleteCb = null;
+        }
       } else {
         _shape.alpha -= FADE_SPEED;
       }
@@ -192,15 +196,16 @@
 
     self.die = function() {
       _state = BlockState.DYING;
+      return {
+        then: function(onDieComplete) {
+          _onDieCompleteCb = onDieComplete;
+        }
+      };
     };
 
     self.isSitting = function() {
       return _state === BlockState.SITTING || _state === BlockState.CREATING;
     };
-
-    self.isFaded = function() {
-      return _state === BlockState.GONE;
-    }
 
     self.getShape = function() {
       return _shape;
