@@ -7,7 +7,6 @@
 
     var SWAP_SPEED = 1;
     var FALL_SPEED = 1;
-    var FADE_SPEED = 0.05;
     var BLOCK_BITMAPS = [
       'images/assets/gblock_32.png',
       'images/assets/rblock_32.png',
@@ -24,7 +23,6 @@
       _shape,
       _isBitmap,
       _setBlockPosition,
-      _onDieCompleteCb,
       _onSwapCompleteCb;
 
     var initialize = function(setBlockPosition, x, y, type) {
@@ -145,17 +143,6 @@
       };
     };
 
-    var fadeOut = function() {
-      var isFadedOut = (_shape.alpha <= 0);
-      if (isFadedOut) {
-        if (_onDieCompleteCb) {
-          _onDieCompleteCb(self);
-          _onDieCompleteCb = null;
-        }
-      } else {
-        _shape.alpha -= FADE_SPEED;
-      }
-    }
 
     /////////////////////////////////
     ////// PUBLIC METHODS ///////////
@@ -196,11 +183,6 @@
 
     self.die = function() {
       _state = BlockState.DYING;
-      return {
-        then: function(onDieComplete) {
-          _onDieCompleteCb = onDieComplete;
-        }
-      };
     };
 
     self.isSitting = function() {
@@ -218,8 +200,6 @@
         swapToCol(_col + 1);
       } else if (_state === BlockState.FALLING) {
         fallDown();
-      } else if (_state === BlockState.DYING) {
-        fadeOut();
       }
       if (window.DEBUG_MODE) {
         setDebugColor();
